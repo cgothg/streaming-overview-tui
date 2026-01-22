@@ -1,0 +1,42 @@
+repos:
+  # Security scanning
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: name-tests-tests
+      # - id: no-commit-to-branch
+      #   args: [--branch, main, --branch, master]
+
+  # -----------------------------
+  # Ruff (lint + fixes + imports)
+  # -----------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.13
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # -----------------------------
+  # Tool for automatically reordering python imports.
+  # -----------------------------
+
+  - repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.16.0
+    hooks:
+      - id: reorder-python-imports
+
+  # -----------------------------
+  # pyupgrade (for updating syntax to newer versions)
+  # -----------------------------
+
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+      - id: pyupgrade
