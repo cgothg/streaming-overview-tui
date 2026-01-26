@@ -19,3 +19,9 @@ dependencies = [
 
 [project.scripts]
 streaming-tui = "streaming_overview_tui.run:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+]
