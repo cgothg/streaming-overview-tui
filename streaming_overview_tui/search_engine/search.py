@@ -71,7 +71,11 @@ async def search(
         matched_services: list[StreamingService] = []
         for provider in details.providers:
             service = map_provider_to_service(provider.provider_name)
-            if service and service in subscribed_services and service not in matched_services:
+            if (
+                service
+                and service in subscribed_services
+                and service not in matched_services
+            ):
                 matched_services.append(service)
 
         # Build ContentItem

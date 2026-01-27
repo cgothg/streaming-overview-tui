@@ -15,23 +15,17 @@ from streaming_overview_tui.data_layer.repository import ContentRepository
 class TestContentRepository:
     @pytest.fixture
     def mock_tmdb_client(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.TMDBClient"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.TMDBClient") as mock:
             yield mock
 
     @pytest.fixture
     def mock_init_db(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.init_db"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.init_db") as mock:
             yield mock
 
     @pytest.fixture
     def mock_session(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.get_session"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.get_session") as mock:
             session = MagicMock()
             mock.return_value.__enter__ = MagicMock(return_value=session)
             mock.return_value.__exit__ = MagicMock(return_value=False)
@@ -103,9 +97,7 @@ class TestContentRepository:
         repo = ContentRepository()
         watch_providers = {
             "results": {
-                "US": {
-                    "flatrate": [{"provider_id": 8, "provider_name": "Netflix"}]
-                }
+                "US": {"flatrate": [{"provider_id": 8, "provider_name": "Netflix"}]}
             }
         }
         providers = repo._parse_providers(watch_providers, "DK")
@@ -115,9 +107,7 @@ class TestContentRepository:
         repo = ContentRepository()
         watch_providers = {
             "results": {
-                "DK": {
-                    "rent": [{"provider_id": 2, "provider_name": "Apple TV"}]
-                }
+                "DK": {"rent": [{"provider_id": 2, "provider_name": "Apple TV"}]}
             }
         }
         providers = repo._parse_providers(watch_providers, "DK")

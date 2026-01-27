@@ -242,9 +242,7 @@ class TestSearchErrorHandling:
 
     @pytest.mark.asyncio
     async def test_generic_error_returns_descriptive_message(self, mock_repository):
-        mock_repository.search = AsyncMock(
-            side_effect=Exception("Unknown error")
-        )
+        mock_repository.search = AsyncMock(side_effect=Exception("Unknown error"))
 
         result = await search(
             query="batman",
