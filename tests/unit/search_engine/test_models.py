@@ -95,3 +95,14 @@ class TestProviderMapping:
     def test_map_unknown_returns_none(self):
         assert map_provider_to_service("Apple TV+") is None
         assert map_provider_to_service("Hulu") is None
+
+
+class TestPublicInterface:
+    def test_can_import_from_package(self):
+        from streaming_overview_tui.search_engine import ContentItem
+        from streaming_overview_tui.search_engine import SearchResult
+        from streaming_overview_tui.search_engine import search
+
+        assert ContentItem is not None
+        assert SearchResult is not None
+        assert search is not None
