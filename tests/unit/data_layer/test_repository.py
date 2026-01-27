@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -14,23 +15,17 @@ from streaming_overview_tui.data_layer.repository import ContentRepository
 class TestContentRepository:
     @pytest.fixture
     def mock_tmdb_client(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.TMDBClient"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.TMDBClient") as mock:
             yield mock
 
     @pytest.fixture
     def mock_init_db(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.init_db"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.init_db") as mock:
             yield mock
 
     @pytest.fixture
     def mock_session(self):
-        with patch(
-            "streaming_overview_tui.data_layer.repository.get_session"
-        ) as mock:
+        with patch("streaming_overview_tui.data_layer.repository.get_session") as mock:
             session = MagicMock()
             mock.return_value.__enter__ = MagicMock(return_value=session)
             mock.return_value.__exit__ = MagicMock(return_value=False)
@@ -48,18 +43,18 @@ class TestContentRepository:
 
     def test_is_cache_fresh_when_fresh(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
-        cached_at = datetime.utcnow() - timedelta(days=1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=1)
         assert repo._is_cache_fresh(cached_at) is True
 
     def test_is_cache_fresh_when_expired(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
-        cached_at = datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS + 1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS + 1)
         assert repo._is_cache_fresh(cached_at) is False
 
     def test_is_cache_fresh_at_boundary(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
         # Exactly at TTL should still be fresh
-        cached_at = datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS - 1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS - 1)
         assert repo._is_cache_fresh(cached_at) is True
 
     def test_extract_year_valid(self, mock_tmdb_client, mock_init_db):
@@ -102,9 +97,7 @@ class TestContentRepository:
         repo = ContentRepository()
         watch_providers = {
             "results": {
-                "US": {
-                    "flatrate": [{"provider_id": 8, "provider_name": "Netflix"}]
-                }
+                "US": {"flatrate": [{"provider_id": 8, "provider_name": "Netflix"}]}
             }
         }
         providers = repo._parse_providers(watch_providers, "DK")
@@ -114,9 +107,7 @@ class TestContentRepository:
         repo = ContentRepository()
         watch_providers = {
             "results": {
-                "DK": {
-                    "rent": [{"provider_id": 2, "provider_name": "Apple TV"}]
-                }
+                "DK": {"rent": [{"provider_id": 2, "provider_name": "Apple TV"}]}
             }
         }
         providers = repo._parse_providers(watch_providers, "DK")
@@ -183,7 +174,7 @@ class TestContentRepository:
             overview="Cached overview",
             rating=8.5,
             poster_path="/cached.jpg",
-            cached_at=datetime.utcnow(),  # Fresh cache
+            cached_at=datetime.now(timezone.utc),  # Fresh cache
         )
         mock_session.get.return_value = cached_movie
         mock_session.exec.return_value.all.return_value = []
@@ -245,7 +236,7 @@ class TestContentRepository:
             overview="Stale overview",
             rating=7.0,
             poster_path="/stale.jpg",
-            cached_at=datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS + 10),
+            cached_at=datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS + 10),
         )
         mock_session.get.return_value = expired_movie
         mock_session.exec.return_value.all.return_value = []

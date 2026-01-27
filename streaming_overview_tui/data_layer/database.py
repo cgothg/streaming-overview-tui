@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from platformdirs import user_data_dir
+from sqlmodel import create_engine
 from sqlmodel import Session
 from sqlmodel import SQLModel
-from sqlmodel import create_engine
 
 APP_NAME = "streaming-overview-tui"
 DATA_DIR = Path(user_data_dir(APP_NAME))

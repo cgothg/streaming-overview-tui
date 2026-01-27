@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 from sqlmodel import select
 
@@ -29,7 +30,7 @@ class ContentRepository:
     def _is_cache_fresh(self, cached_at: datetime) -> bool:
         """Check if cached data is still fresh."""
         expiry = cached_at + timedelta(days=CACHE_TTL_DAYS)
-        return datetime.now(datetime.UTC) < expiry
+        return datetime.now(timezone.utc) < expiry
 
     def _extract_year(self, date_str: str | None) -> int | None:
         """Extract year from TMDB date string (YYYY-MM-DD)."""
@@ -248,7 +249,7 @@ class ContentRepository:
         self, data: dict, providers: list[StreamingProvider], region: str
     ) -> Movie:
         """Cache movie data and return Movie object."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         cached_movie = CachedMovie(
             id=data["id"],
@@ -312,7 +313,7 @@ class ContentRepository:
         self, data: dict, providers: list[StreamingProvider], region: str
     ) -> Show:
         """Cache show data and return Show object."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         cached_show = CachedShow(
             id=data["id"],
