@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+import httpx
 import pytest
 
 from streaming_overview_tui.config_layer.config import StreamingService
@@ -138,7 +139,9 @@ class TestSearchPartitioning:
 
         result = await search(
             query="movie",
-            subscribed_services=[StreamingService.NETFLIX],  # Only subscribed to Netflix
+            subscribed_services=[
+                StreamingService.NETFLIX
+            ],  # Only subscribed to Netflix
             region="DK",
         )
 
@@ -188,3 +191,67 @@ class TestSearchPartitioning:
         assert len(result.available) == 0
         assert len(result.other) == 1
         assert result.other[0].title == "Movie No Streaming"
+
+
+class TestSearchErrorHandling:
+    @pytest.fixture
+    def mock_repository(self):
+        with patch(
+            "streaming_overview_tui.search_engine.search.ContentRepository"
+        ) as mock:
+            repo_instance = MagicMock()
+            mock.return_value = repo_instance
+            yield repo_instance
+
+    @pytest.mark.asyncio
+    async def test_timeout_error_returns_descriptive_message(self, mock_repository):
+        mock_repository.search = AsyncMock(
+            side_effect=httpx.TimeoutException("Connection timeout")
+        )
+
+        result = await search(
+            query="batman",
+            subscribed_services=[StreamingService.NETFLIX],
+            region="DK",
+        )
+
+        assert result.available == []
+        assert result.other == []
+        assert "TMDB API" in result.error
+        assert "timeout" in result.error.lower()
+
+    @pytest.mark.asyncio
+    async def test_http_error_returns_descriptive_message(self, mock_repository):
+        mock_repository.search = AsyncMock(
+            side_effect=httpx.HTTPStatusError(
+                "Rate limited",
+                request=MagicMock(),
+                response=MagicMock(status_code=429),
+            )
+        )
+
+        result = await search(
+            query="batman",
+            subscribed_services=[StreamingService.NETFLIX],
+            region="DK",
+        )
+
+        assert result.available == []
+        assert result.other == []
+        assert "TMDB API" in result.error
+
+    @pytest.mark.asyncio
+    async def test_generic_error_returns_descriptive_message(self, mock_repository):
+        mock_repository.search = AsyncMock(
+            side_effect=Exception("Unknown error")
+        )
+
+        result = await search(
+            query="batman",
+            subscribed_services=[StreamingService.NETFLIX],
+            region="DK",
+        )
+
+        assert result.available == []
+        assert result.other == []
+        assert "TMDB API" in result.error

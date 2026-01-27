@@ -1,3 +1,5 @@
+import httpx
+
 from streaming_overview_tui.config_layer.config import StreamingService
 from streaming_overview_tui.data_layer.repository import ContentRepository
 from streaming_overview_tui.search_engine.models import ContentItem
@@ -25,19 +27,42 @@ async def search(
         return SearchResult(available=[], other=[], error=None)
 
     repository = ContentRepository()
-    tmdb_results = await repository.search(query)
+
+    try:
+        tmdb_results = await repository.search(query)
+    except httpx.TimeoutException:
+        return SearchResult(
+            available=[],
+            other=[],
+            error="TMDB API request failed: connection timeout",
+        )
+    except httpx.HTTPStatusError as e:
+        return SearchResult(
+            available=[],
+            other=[],
+            error=f"TMDB API returned error: HTTP {e.response.status_code}",
+        )
+    except Exception:
+        return SearchResult(
+            available=[],
+            other=[],
+            error="TMDB API unavailable - please try again later",
+        )
 
     available: list[ContentItem] = []
     other: list[ContentItem] = []
 
     for tmdb_item in tmdb_results:
         # Fetch full details with streaming providers
-        if tmdb_item.content_type == "movie":
-            details = await repository.get_movie(tmdb_item.id)
-            content_type = "movie"
-        else:
-            details = await repository.get_show(tmdb_item.id)
-            content_type = "tv"
+        try:
+            if tmdb_item.content_type == "movie":
+                details = await repository.get_movie(tmdb_item.id)
+                content_type = "movie"
+            else:
+                details = await repository.get_show(tmdb_item.id)
+                content_type = "tv"
+        except Exception:
+            continue  # Skip items that fail to fetch
 
         if details is None:
             continue
