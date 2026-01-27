@@ -1,5 +1,7 @@
 from streaming_overview_tui.config_layer.config import StreamingService
-from streaming_overview_tui.search_engine.models import ContentItem, SearchResult
+from streaming_overview_tui.search_engine.models import ContentItem
+from streaming_overview_tui.search_engine.models import map_provider_to_service
+from streaming_overview_tui.search_engine.models import SearchResult
 
 
 class TestContentItem:
@@ -70,3 +72,26 @@ class TestSearchResult:
         assert result.available == []
         assert result.other == []
         assert result.error == "TMDB API unavailable - please try again later"
+
+
+class TestProviderMapping:
+    def test_map_netflix(self):
+        assert map_provider_to_service("Netflix") == StreamingService.NETFLIX
+
+    def test_map_hbo_max(self):
+        # TMDB uses "Max" for HBO Max
+        assert map_provider_to_service("Max") == StreamingService.HBO_MAX
+        assert map_provider_to_service("HBO Max") == StreamingService.HBO_MAX
+
+    def test_map_amazon_prime(self):
+        assert (
+            map_provider_to_service("Amazon Prime Video")
+            == StreamingService.AMAZON_PRIME
+        )
+
+    def test_map_disney_plus(self):
+        assert map_provider_to_service("Disney Plus") == StreamingService.DISNEY_PLUS
+
+    def test_map_unknown_returns_none(self):
+        assert map_provider_to_service("Apple TV+") is None
+        assert map_provider_to_service("Hulu") is None

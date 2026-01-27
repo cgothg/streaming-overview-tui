@@ -23,3 +23,18 @@ class SearchResult:
     available: list[ContentItem]
     other: list[ContentItem]
     error: str | None
+
+
+# Mapping from TMDB provider names to StreamingService enum
+PROVIDER_NAME_MAP: dict[str, StreamingService] = {
+    "Netflix": StreamingService.NETFLIX,
+    "Max": StreamingService.HBO_MAX,
+    "HBO Max": StreamingService.HBO_MAX,
+    "Amazon Prime Video": StreamingService.AMAZON_PRIME,
+    "Disney Plus": StreamingService.DISNEY_PLUS,
+}
+
+
+def map_provider_to_service(provider_name: str) -> StreamingService | None:
+    """Map TMDB provider name to StreamingService enum."""
+    return PROVIDER_NAME_MAP.get(provider_name)
