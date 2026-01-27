@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -48,18 +49,18 @@ class TestContentRepository:
 
     def test_is_cache_fresh_when_fresh(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
-        cached_at = datetime.utcnow() - timedelta(days=1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=1)
         assert repo._is_cache_fresh(cached_at) is True
 
     def test_is_cache_fresh_when_expired(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
-        cached_at = datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS + 1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS + 1)
         assert repo._is_cache_fresh(cached_at) is False
 
     def test_is_cache_fresh_at_boundary(self, mock_tmdb_client, mock_init_db):
         repo = ContentRepository()
         # Exactly at TTL should still be fresh
-        cached_at = datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS - 1)
+        cached_at = datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS - 1)
         assert repo._is_cache_fresh(cached_at) is True
 
     def test_extract_year_valid(self, mock_tmdb_client, mock_init_db):
@@ -183,7 +184,7 @@ class TestContentRepository:
             overview="Cached overview",
             rating=8.5,
             poster_path="/cached.jpg",
-            cached_at=datetime.utcnow(),  # Fresh cache
+            cached_at=datetime.now(timezone.utc),  # Fresh cache
         )
         mock_session.get.return_value = cached_movie
         mock_session.exec.return_value.all.return_value = []
@@ -245,7 +246,7 @@ class TestContentRepository:
             overview="Stale overview",
             rating=7.0,
             poster_path="/stale.jpg",
-            cached_at=datetime.utcnow() - timedelta(days=CACHE_TTL_DAYS + 10),
+            cached_at=datetime.now(timezone.utc) - timedelta(days=CACHE_TTL_DAYS + 10),
         )
         mock_session.get.return_value = expired_movie
         mock_session.exec.return_value.all.return_value = []
