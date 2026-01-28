@@ -115,53 +115,67 @@ class ResultsList(Widget):
                 container.mount(Static("No results found", classes="placeholder"))
             return
 
-        # Build list items to mount
-        list_items: list[ListItem] = []
-
+        # Build available section
         if self.results.available:
             container.mount(
                 Label("AVAILABLE ON YOUR SERVICES", classes="section-header")
             )
+            available_items: list[ListItem] = []
             for item in self.results.available:
                 self._items.append(item)
                 services_str = ", ".join(s.value for s in item.services)
                 year_str = f" ({item.year})" if item.year else ""
-                list_items.append(
+                available_items.append(
                     ListItem(
                         Label(f"{item.title}{year_str} - {services_str}"),
                         id=f"item-{item.tmdb_id}",
                     )
                 )
+            container.mount(ListView(*available_items, id="available-list"))
 
+        # Build other section
         if self.results.other:
             container.mount(Label("OTHER RESULTS", classes="section-header"))
+            other_items: list[ListItem] = []
             for item in self.results.other:
                 self._items.append(item)
                 year_str = f" ({item.year})" if item.year else ""
-                list_items.append(
+                other_items.append(
                     ListItem(
                         Label(f"{item.title}{year_str}"),
                         id=f"item-{item.tmdb_id}",
                     )
                 )
+            container.mount(ListView(*other_items, id="other-list"))
 
-        # Create ListView with all items at once
-        list_view = ListView(*list_items)
-        container.mount(list_view)
+    def _get_item_from_list_event(self, list_view: ListView) -> ContentItem | None:
+        """Get ContentItem from a ListView event by matching item ID."""
+        if list_view.index is None:
+            return None
+        # Get the highlighted ListItem
+        highlighted = list_view.highlighted_child
+        if highlighted is None:
+            return None
+        # Extract tmdb_id from item ID (format: "item-{tmdb_id}")
+        item_id = highlighted.id
+        if item_id and item_id.startswith("item-"):
+            try:
+                tmdb_id = int(item_id[5:])
+                for item in self._items:
+                    if item.tmdb_id == tmdb_id:
+                        return item
+            except ValueError:
+                pass
+        return None
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Handle item selection."""
-        # Find the item by index
-        if event.list_view.index is not None and event.list_view.index < len(
-            self._items
-        ):
-            item = self._items[event.list_view.index]
+        item = self._get_item_from_list_event(event.list_view)
+        if item:
             self.post_message(self.ItemSelected(item))
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         """Handle item highlight (for keyboard navigation)."""
-        if event.list_view.index is not None and event.list_view.index < len(
-            self._items
-        ):
-            item = self._items[event.list_view.index]
+        item = self._get_item_from_list_event(event.list_view)
+        if item:
             self.post_message(self.ItemSelected(item))
