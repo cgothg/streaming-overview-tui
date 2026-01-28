@@ -145,6 +145,11 @@ class TestSearchPartitioning:
         assert result.available[0].title == "Movie on Netflix"
         assert result.available[0].services == [StreamingService.NETFLIX]
 
+        # Verify detail fields are populated
+        assert result.available[0].overview == "..."
+        assert result.available[0].rating == 8.0
+        assert result.available[0].watch_urls == {StreamingService.NETFLIX: "..."}
+
         # Movie on Disney should be in "other"
         assert len(result.other) == 1
         assert result.other[0].title == "Movie on Disney"
