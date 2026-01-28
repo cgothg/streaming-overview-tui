@@ -19,7 +19,9 @@ class ResultsListApp(App):
         yield ResultsList(results=self.results)
 
 
-def make_item(title: str, services: list[StreamingService] | None = None) -> ContentItem:
+def make_item(
+    title: str, services: list[StreamingService] | None = None
+) -> ContentItem:
     """Helper to create test items."""
     return ContentItem(
         tmdb_id=hash(title) % 10000,
@@ -74,7 +76,9 @@ class TestResultsList:
     @pytest.mark.asyncio
     async def test_shows_service_names_for_available(self):
         results = SearchResult(
-            available=[make_item("Movie", [StreamingService.NETFLIX, StreamingService.HBO_MAX])],
+            available=[
+                make_item("Movie", [StreamingService.NETFLIX, StreamingService.HBO_MAX])
+            ],
             other=[],
             error=None,
         )

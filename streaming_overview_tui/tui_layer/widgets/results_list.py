@@ -119,7 +119,9 @@ class ResultsList(Widget):
         list_items: list[ListItem] = []
 
         if self.results.available:
-            container.mount(Label("AVAILABLE ON YOUR SERVICES", classes="section-header"))
+            container.mount(
+                Label("AVAILABLE ON YOUR SERVICES", classes="section-header")
+            )
             for item in self.results.available:
                 self._items.append(item)
                 services_str = ", ".join(s.value for s in item.services)
@@ -150,12 +152,16 @@ class ResultsList(Widget):
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Handle item selection."""
         # Find the item by index
-        if event.list_view.index is not None and event.list_view.index < len(self._items):
+        if event.list_view.index is not None and event.list_view.index < len(
+            self._items
+        ):
             item = self._items[event.list_view.index]
             self.post_message(self.ItemSelected(item))
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         """Handle item highlight (for keyboard navigation)."""
-        if event.list_view.index is not None and event.list_view.index < len(self._items):
+        if event.list_view.index is not None and event.list_view.index < len(
+            self._items
+        ):
             item = self._items[event.list_view.index]
             self.post_message(self.ItemSelected(item))
