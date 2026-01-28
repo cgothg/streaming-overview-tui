@@ -12,7 +12,6 @@ from textual.widgets import Footer
 from textual.widgets import Header
 from textual.widgets import Input
 from textual.widgets import Static
-from textual.worker import get_current_worker
 
 from streaming_overview_tui.config_layer.config import load_user_config
 from streaming_overview_tui.config_layer.config import StreamingService
@@ -120,9 +119,7 @@ class MainScreen(Screen):
     async def _do_search(self, query: str) -> None:
         """Perform search in background worker."""
         # Update status
-        worker = get_current_worker()
-        if not worker.is_cancelled:
-            self.app.call_from_thread(self._set_status, "Searching...")
+        self._set_status("Searching...")
 
         # Get subscribed services
         subscriptions = [
@@ -134,9 +131,8 @@ class MainScreen(Screen):
         # Perform search
         result = await search(query, subscriptions)
 
-        # Update UI if not cancelled
-        if not worker.is_cancelled:
-            self.app.call_from_thread(self._update_results, result)
+        # Update UI
+        self._update_results(result)
 
     def _set_status(self, message: str) -> None:
         """Update status bar."""
