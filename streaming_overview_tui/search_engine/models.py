@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Literal
 
 from streaming_overview_tui.config_layer.config import StreamingService
@@ -14,6 +15,9 @@ class ContentItem:
     content_type: Literal["movie", "tv"]
     poster_url: str | None
     services: list[StreamingService]
+    overview: str | None = None
+    rating: float | None = None
+    watch_urls: dict[StreamingService, str] = field(default_factory=dict)
 
 
 @dataclass

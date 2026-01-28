@@ -86,6 +86,5 @@ def get_available_services() -> list[str]:
     return [service.value for service in StreamingService]
 
 
-# Global instances
+# Global instance
 app_settings = AppSettings()
-user_config = load_user_config()

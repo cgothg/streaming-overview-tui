@@ -3,10 +3,10 @@ from datetime import datetime
 from streaming_overview_tui.data_layer.models import CachedMovie
 from streaming_overview_tui.data_layer.models import CachedShow
 from streaming_overview_tui.data_layer.models import Movie
-from streaming_overview_tui.data_layer.models import SearchResult
 from streaming_overview_tui.data_layer.models import Show
 from streaming_overview_tui.data_layer.models import StreamingAvailability
 from streaming_overview_tui.data_layer.models import StreamingProvider
+from streaming_overview_tui.data_layer.models import TMDBSearchResult
 
 
 class TestCachedMovie:
@@ -74,9 +74,9 @@ class TestStreamingAvailability:
         assert availability.link == "https://www.netflix.com/title/123"
 
 
-class TestSearchResult:
+class TestTMDBSearchResult:
     def test_create_search_result(self):
-        result = SearchResult(
+        result = TMDBSearchResult(
             id=123,
             title="Test Movie",
             year=2023,

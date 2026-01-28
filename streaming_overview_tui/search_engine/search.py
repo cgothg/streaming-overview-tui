@@ -20,7 +20,6 @@ def _build_poster_url(poster_path: str | None) -> str | None:
 async def search(
     query: str,
     subscribed_services: list[StreamingService],
-    region: str,
 ) -> SearchResult:
     """Search for movies and TV shows, partitioned by streaming availability."""
     if len(query) < MIN_QUERY_LENGTH:
@@ -67,8 +66,9 @@ async def search(
         if details is None:
             continue
 
-        # Map providers to subscribed services
+        # Map providers to subscribed services with URLs
         matched_services: list[StreamingService] = []
+        watch_urls: dict[StreamingService, str] = {}
         for provider in details.providers:
             service = map_provider_to_service(provider.provider_name)
             if (
@@ -77,6 +77,7 @@ async def search(
                 and service not in matched_services
             ):
                 matched_services.append(service)
+                watch_urls[service] = provider.link
 
         # Build ContentItem
         item = ContentItem(
@@ -86,6 +87,9 @@ async def search(
             content_type=content_type,
             poster_url=_build_poster_url(tmdb_item.poster_path),
             services=matched_services,
+            overview=details.overview,
+            rating=details.rating,
+            watch_urls=watch_urls,
         )
 
         # Partition by availability

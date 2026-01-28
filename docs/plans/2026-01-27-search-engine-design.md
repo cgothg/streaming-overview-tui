@@ -12,9 +12,10 @@ The search engine provides fuzzy search for movies and TV shows, with results fi
 async def search(
     query: str,
     subscribed_services: list[StreamingService],
-    region: str
 ) -> SearchResult
 ```
+
+Region is determined internally from user config via `load_user_config()`.
 
 ### SearchResult
 
