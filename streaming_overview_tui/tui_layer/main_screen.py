@@ -122,7 +122,7 @@ class MainScreen(Screen):
         # Update status
         worker = get_current_worker()
         if not worker.is_cancelled:
-            self.call_from_thread(self._set_status, "Searching...")
+            self.app.call_from_thread(self._set_status, "Searching...")
 
         # Get subscribed services
         subscriptions = [
@@ -136,7 +136,7 @@ class MainScreen(Screen):
 
         # Update UI if not cancelled
         if not worker.is_cancelled:
-            self.call_from_thread(self._update_results, result)
+            self.app.call_from_thread(self._update_results, result)
 
     def _set_status(self, message: str) -> None:
         """Update status bar."""
