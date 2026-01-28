@@ -20,7 +20,6 @@ def _build_poster_url(poster_path: str | None) -> str | None:
 async def search(
     query: str,
     subscribed_services: list[StreamingService],
-    region: str,
 ) -> SearchResult:
     """Search for movies and TV shows, partitioned by streaming availability."""
     if len(query) < MIN_QUERY_LENGTH:

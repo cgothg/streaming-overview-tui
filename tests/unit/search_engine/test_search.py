@@ -7,8 +7,8 @@ import pytest
 
 from streaming_overview_tui.config_layer.config import StreamingService
 from streaming_overview_tui.data_layer.models import Movie
-from streaming_overview_tui.data_layer.models import SearchResult as TMDBSearchResult
 from streaming_overview_tui.data_layer.models import StreamingProvider
+from streaming_overview_tui.data_layer.models import TMDBSearchResult
 from streaming_overview_tui.search_engine.search import search
 
 
@@ -18,7 +18,6 @@ class TestSearchValidation:
         result = await search(
             query="a",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
         assert result.available == []
         assert result.other == []
@@ -29,7 +28,6 @@ class TestSearchValidation:
         result = await search(
             query="",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
         assert result.available == []
         assert result.other == []
@@ -53,7 +51,6 @@ class TestSearchTMDBIntegration:
         await search(
             query="batman",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         mock_repository.search.assert_called_once_with("batman")
@@ -65,7 +62,6 @@ class TestSearchTMDBIntegration:
         await search(
             query="b",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         mock_repository.search.assert_not_called()
@@ -142,7 +138,6 @@ class TestSearchPartitioning:
             subscribed_services=[
                 StreamingService.NETFLIX
             ],  # Only subscribed to Netflix
-            region="DK",
         )
 
         # Movie on Netflix should be in "available"
@@ -185,7 +180,6 @@ class TestSearchPartitioning:
         result = await search(
             query="movie",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         assert len(result.available) == 0
@@ -212,7 +206,6 @@ class TestSearchErrorHandling:
         result = await search(
             query="batman",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         assert result.available == []
@@ -233,7 +226,6 @@ class TestSearchErrorHandling:
         result = await search(
             query="batman",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         assert result.available == []
@@ -247,7 +239,6 @@ class TestSearchErrorHandling:
         result = await search(
             query="batman",
             subscribed_services=[StreamingService.NETFLIX],
-            region="DK",
         )
 
         assert result.available == []

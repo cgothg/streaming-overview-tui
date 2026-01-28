@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timezone
 
 from sqlmodel import Field
 from sqlmodel import SQLModel
@@ -15,7 +16,7 @@ class CachedMovie(SQLModel, table=True):
     overview: str | None = None
     rating: float | None = None  # TMDB vote average
     poster_path: str | None = None  # Relative path for TMDB image CDN
-    cached_at: datetime = Field(default_factory=datetime.utcnow)
+    cached_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class CachedShow(SQLModel, table=True):
@@ -29,7 +30,7 @@ class CachedShow(SQLModel, table=True):
     overview: str | None = None
     rating: float | None = None
     poster_path: str | None = None
-    cached_at: datetime = Field(default_factory=datetime.utcnow)
+    cached_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class StreamingAvailability(SQLModel, table=True):
@@ -44,14 +45,14 @@ class StreamingAvailability(SQLModel, table=True):
     provider_name: str  # e.g., "Netflix"
     region: str  # e.g., "DK"
     link: str  # Direct watch link from TMDB
-    cached_at: datetime = Field(default_factory=datetime.utcnow)
+    cached_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # Lightweight types for search results and API responses
 
 
-class SearchResult:
-    """Lightweight search result for display."""
+class TMDBSearchResult:
+    """Lightweight search result from TMDB API."""
 
     def __init__(
         self,

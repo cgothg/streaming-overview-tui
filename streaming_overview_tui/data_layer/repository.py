@@ -10,10 +10,10 @@ from streaming_overview_tui.data_layer.database import init_db
 from streaming_overview_tui.data_layer.models import CachedMovie
 from streaming_overview_tui.data_layer.models import CachedShow
 from streaming_overview_tui.data_layer.models import Movie
-from streaming_overview_tui.data_layer.models import SearchResult
 from streaming_overview_tui.data_layer.models import Show
 from streaming_overview_tui.data_layer.models import StreamingAvailability
 from streaming_overview_tui.data_layer.models import StreamingProvider
+from streaming_overview_tui.data_layer.models import TMDBSearchResult
 from streaming_overview_tui.data_layer.tmdb_client import TMDBClient
 
 # Cache TTL in days
@@ -64,7 +64,7 @@ class ContentRepository:
 
         return providers
 
-    async def search(self, query: str) -> list[SearchResult]:
+    async def search(self, query: str) -> list[TMDBSearchResult]:
         """Search for movies and TV shows.
 
         Returns cached results if fresh, otherwise fetches from TMDB.
@@ -80,7 +80,7 @@ class ContentRepository:
 
             if media_type == "movie":
                 results.append(
-                    SearchResult(
+                    TMDBSearchResult(
                         id=item["id"],
                         title=item.get("title", "Unknown"),
                         year=self._extract_year(item.get("release_date")),
@@ -91,7 +91,7 @@ class ContentRepository:
                 )
             else:  # tv
                 results.append(
-                    SearchResult(
+                    TMDBSearchResult(
                         id=item["id"],
                         title=item.get("name", "Unknown"),
                         year=self._extract_year(item.get("first_air_date")),
