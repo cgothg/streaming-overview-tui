@@ -1,4 +1,9 @@
+import io
+from unittest.mock import AsyncMock
+from unittest.mock import patch
+
 import pytest
+from PIL import Image
 from textual.app import App
 from textual.app import ComposeResult
 
@@ -26,3 +31,35 @@ class TestPosterWidget:
             rendered = widget.render_str()
             assert "No" in rendered
             assert "Poster" in rendered
+
+
+class TestPosterWidgetFetch:
+    @pytest.mark.asyncio
+    async def test_fetches_and_renders_poster(self):
+        """When poster_url is set, fetch and render the image."""
+        # Create a small test image
+        test_image = Image.new("RGB", (92, 138), color=(255, 0, 0))
+        img_bytes = io.BytesIO()
+        test_image.save(img_bytes, format="PNG")
+        img_bytes.seek(0)
+
+        mock_response = AsyncMock()
+        mock_response.content = img_bytes.getvalue()
+        mock_response.raise_for_status = lambda: None
+
+        with patch("httpx.Client.get", return_value=mock_response):
+            app = PosterWidgetApp(
+                poster_url="https://image.tmdb.org/t/p/w92/test.jpg",
+                tmdb_id=123,
+            )
+            async with app.run_test() as pilot:
+                widget = pilot.app.query_one(PosterWidget)
+                # Trigger fetch
+                widget.fetch_poster()
+                # Wait for worker to complete
+                await pilot.pause()
+                await pilot.pause()
+
+                rendered = widget.render_str()
+                # Should contain half-block characters, not placeholder
+                assert "▄" in rendered
