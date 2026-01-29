@@ -1,4 +1,5 @@
 from textual.app import ComposeResult
+from textual.containers import Horizontal
 from textual.containers import Vertical
 from textual.reactive import reactive
 from textual.widget import Widget
@@ -7,6 +8,7 @@ from textual.widgets import Label
 from textual.widgets import Static
 
 from streaming_overview_tui.search_engine.models import ContentItem
+from streaming_overview_tui.tui_layer.widgets.poster_widget import PosterWidget
 
 
 class DetailPanel(Widget):
@@ -17,6 +19,20 @@ class DetailPanel(Widget):
         width: 100%;
         height: 100%;
         padding: 1;
+    }
+
+    DetailPanel Horizontal {
+        height: auto;
+    }
+
+    DetailPanel #poster-container {
+        width: 12;
+        height: 18;
+        margin-right: 1;
+    }
+
+    DetailPanel #info-container {
+        width: 1fr;
     }
 
     DetailPanel .title {
@@ -53,7 +69,9 @@ class DetailPanel(Widget):
         self.item = item
 
     def compose(self) -> ComposeResult:
-        yield Vertical(id="detail-content")
+        with Horizontal():
+            yield PosterWidget(id="poster-container")
+            yield Vertical(id="info-container")
 
     def on_mount(self) -> None:
         """Build initial content when mounted."""
@@ -87,24 +105,37 @@ class DetailPanel(Widget):
 
     def _rebuild_content(self) -> None:
         """Rebuild the panel content."""
-        container = self.query_one("#detail-content", Vertical)
-        container.remove_children()
+        info_container = self.query_one("#info-container", Vertical)
+        info_container.remove_children()
+
+        poster_widget = self.query_one(PosterWidget)
 
         if self.item is None:
-            container.mount(Static("Select an item to see details", classes="empty"))
+            poster_widget.poster_url = None
+            poster_widget.tmdb_id = None
+            info_container.mount(
+                Static("Select an item to see details", classes="empty")
+            )
             return
+
+        # Update poster widget
+        poster_widget.poster_url = self.item.poster_url
+        poster_widget.tmdb_id = self.item.tmdb_id
+        poster_widget.fetch_poster()
 
         # Title and year
         year_str = f" ({self.item.year})" if self.item.year else ""
-        container.mount(Label(f"{self.item.title}{year_str}", classes="title"))
+        info_container.mount(Label(f"{self.item.title}{year_str}", classes="title"))
 
         # Content type
         type_str = "Movie" if self.item.content_type == "movie" else "TV Show"
-        container.mount(Label(type_str, classes="type"))
+        info_container.mount(Label(type_str, classes="type"))
 
         # Rating
         if self.item.rating is not None:
-            container.mount(Label(f"Rating: {self.item.rating}/10", classes="rating"))
+            info_container.mount(
+                Label(f"Rating: {self.item.rating}/10", classes="rating")
+            )
 
         # Overview
         if self.item.overview:
@@ -112,9 +143,9 @@ class DetailPanel(Widget):
             overview = self.item.overview
             if len(overview) > 200:
                 overview = overview[:197] + "..."
-            container.mount(Static(overview, classes="overview"))
+            info_container.mount(Static(overview, classes="overview"))
         else:
-            container.mount(Static("No description available", classes="overview"))
+            info_container.mount(Static("No description available", classes="overview"))
 
         # Watch buttons
         for service in self.item.services:
@@ -122,4 +153,4 @@ class DetailPanel(Widget):
                 url = self.item.watch_urls[service]
                 btn = Button(f"Watch on {service.value}", classes="watch-button")
                 btn.url = url  # Store URL on button for handler
-                container.mount(btn)
+                info_container.mount(btn)

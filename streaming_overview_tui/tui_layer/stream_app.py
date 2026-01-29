@@ -1,3 +1,4 @@
+from PIL import Image
 from textual.app import App
 
 from streaming_overview_tui.config_layer.config import config_exists
@@ -10,6 +11,10 @@ class StreamApp(App):
     """Main application for streaming overview TUI."""
 
     TITLE = "Streaming Overview"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.poster_cache: dict[int, Image.Image] = {}
 
     def on_mount(self) -> None:
         """Route to appropriate screen based on config existence."""

@@ -5,6 +5,7 @@ from textual.app import ComposeResult
 from streaming_overview_tui.config_layer.config import StreamingService
 from streaming_overview_tui.search_engine.models import ContentItem
 from streaming_overview_tui.tui_layer.widgets.detail_panel import DetailPanel
+from streaming_overview_tui.tui_layer.widgets.poster_widget import PosterWidget
 
 
 class DetailPanelApp(App):
@@ -113,3 +114,41 @@ class TestDetailPanel:
             rendered = panel.render_str()
             # Should be mostly empty or show placeholder
             assert "The Batman" not in rendered
+
+
+class TestDetailPanelLayout:
+    @pytest.mark.asyncio
+    async def test_has_poster_widget(self):
+        """DetailPanel should contain a PosterWidget."""
+        item = ContentItem(
+            tmdb_id=123,
+            title="Test Movie",
+            year=2022,
+            content_type="movie",
+            poster_url="/test.jpg",
+            services=[],
+            overview="Test overview",
+            rating=7.5,
+            watch_urls={},
+        )
+        async with DetailPanelApp(item).run_test() as pilot:
+            posters = pilot.app.query(PosterWidget)
+            assert len(posters) == 1
+
+    @pytest.mark.asyncio
+    async def test_poster_receives_url_from_item(self):
+        """PosterWidget should receive poster_url from ContentItem."""
+        item = ContentItem(
+            tmdb_id=456,
+            title="Test Movie",
+            year=2022,
+            content_type="movie",
+            poster_url="/poster123.jpg",
+            services=[],
+            overview=None,
+            rating=None,
+            watch_urls={},
+        )
+        async with DetailPanelApp(item).run_test() as pilot:
+            poster = pilot.app.query_one(PosterWidget)
+            assert poster.tmdb_id == 456
