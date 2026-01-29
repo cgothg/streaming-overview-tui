@@ -113,7 +113,9 @@ class DetailPanel(Widget):
         if self.item is None:
             poster_widget.poster_url = None
             poster_widget.tmdb_id = None
-            info_container.mount(Static("Select an item to see details", classes="empty"))
+            info_container.mount(
+                Static("Select an item to see details", classes="empty")
+            )
             return
 
         # Update poster widget
@@ -131,7 +133,9 @@ class DetailPanel(Widget):
 
         # Rating
         if self.item.rating is not None:
-            info_container.mount(Label(f"Rating: {self.item.rating}/10", classes="rating"))
+            info_container.mount(
+                Label(f"Rating: {self.item.rating}/10", classes="rating")
+            )
 
         # Overview
         if self.item.overview:
